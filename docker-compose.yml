@@ -1,0 +1,15 @@
+db:
+  image: postgres
+  env_file:
+    - ./db.env
+web:
+  build: .
+  command: bash -c "./wait_for_it.sh db:5432 && python manage.py runserver 0.0.0.0:8000"
+  links:
+    - db:db
+  volumes:
+    - .:/code
+  ports:
+    - "8000:8000"
+  env_file:
+    - ./db.env
