@@ -22,7 +22,4 @@ class Event(models.Model):
     location = models.CharField(max_length=200)
 
 
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
-    email = models.EmailField()
-    password = models.CharField(max_length=128)
+
