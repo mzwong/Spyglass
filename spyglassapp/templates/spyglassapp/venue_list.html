@@ -1,0 +1,25 @@
+{% extends "spyglassapp/base.html" %}
+{% block content %}
+    <h1>NYC Venues</h1>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Tripexpert Score</th>
+            <th>Latitude</th>
+            <th>Longitude</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        {% for venue in venues %}
+            <tr>
+                <td> {{ venue.name }} </td>
+                <td> {{ venue.tripexpert_score }} </td>
+                <td> {{ venue.latitude }}</td>
+                <td> {{ venue.longitude }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -25,7 +25,7 @@ SECRET_KEY = 'vn^zvd8dl#4nord6yl&-w5u8u-x4h4@ogeg1w3caqnib1xs55*'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.99.100', 'localhost',]
 
 
 # Application definition
@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'spyglassapp',
 ]
+
+TRIPEXPERT_API_KEY = os.environ.get('TRIPEXPERT_API_KEY')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
