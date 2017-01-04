@@ -2,8 +2,9 @@ from django.shortcuts import render
 import urllib.request
 import urllib.parse
 import urllib
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.conf import settings
+from .route_generate import create_route
 import json
 
 # Create your views here.
@@ -19,3 +20,9 @@ def new_york_city_venues(request):
     resp = json.loads(resp_json)
     context = {'venues': resp['response']['venues']}
     return render(request, 'spyglassapp/venue_list.html', context)
+
+def city_options(request, city):
+    return HttpResponse("city options - TBD")
+
+def route(request, city):
+    return HttpResponse(create_route())
