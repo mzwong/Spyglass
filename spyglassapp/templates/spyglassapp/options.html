@@ -1,0 +1,27 @@
+{% extends "spyglassapp/base.html" %}
+{% block content %}
+    <div class="page-header">
+        <h1>Select Itinerary Options</h1>
+    </div>
+
+    <form enctype="multipart/form-data" action="/itinerary/new_york/options/", method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <p>{{ form.name.errors }}</p>
+            <label for="{{ form.name.id_for_label }}">Name</label>
+            <input type="title" class="form-control" name="{{ form.name.name }}" id="{{ form.name.id_for_label }}">
+        </div>
+
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+        <p>Starting Location:</p>
+        {{ form.starting_position }}
+        <p>Ending Location:</p>
+        {{ form.ending_position }}
+
+        <button type="submit" class="btn btn-default">Submit</button>
+
+    </form>
+
+{% endblock %}

@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'spyglassapp',
+	'geoposition',
 ]
 
 TRIPEXPERT_API_KEY = os.environ.get('TRIPEXPERT_API_KEY')
@@ -124,3 +125,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
+
+GEOPOSITION_GOOGLE_MAPS_API_KEY = 'AIzaSyCLBZgZ0TaNNo3s5X5jnR5tHscetwQCujQ'
