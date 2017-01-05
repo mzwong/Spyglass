@@ -22,7 +22,7 @@ def calculate_score(factor, distance, tripexpert_score):
     #reverse the scaled distance scores so that small distances have a higher scaled score.
     scaled_distance = (factor['max_distance'] - (distance - factor['min_distance'])) / (factor['max_distance']-factor['min_distance'])
     scaled_tripexpert_score = (tripexpert_score - factor['min_score']) / (factor['max_score'] - factor['min_score'])
-    return scaled_distance + scaled_tripexpert_score*10
+    return scaled_distance + scaled_tripexpert_score*100
 
 def create_route():
     #####starting options######
@@ -35,7 +35,7 @@ def create_route():
     ###########################
     itinerary = []
     for i in range(num_events):
-        venues = tripexpert_api_helper('venues?destination_id=6&order_by=distance&latitude='+str(curr_lat)+'&longitude='+str(curr_long))
+        venues = tripexpert_api_helper('venues?venue_type_id=3&destination_id=6&order_by=distance&latitude='+str(curr_lat)+'&longitude='+str(curr_long))
         valid_venues = []
         factors = {
             'min_distance' : 999999,
@@ -58,7 +58,7 @@ def create_route():
             distance = float(venue['distance'])
             venue_long = float(venue['latitude'])
             venue_lat = float(venue['longitude'])
-            venue_score = venue['tripexpert_score']
+            venue_score = venue['tripexpert_score']**2
 
 
             #calculate ellipse search area info:
