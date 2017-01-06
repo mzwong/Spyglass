@@ -6,8 +6,9 @@
         <tr>
             <th>Attraction</th>
             <th>Tripexpert Score</th>
-            <th>Latitude</th>
-            <th>Longitude</th>
+            <th>Address</th>
+            <th>Phone Number</th>
+            <th>Website</th>
         </tr>
         </thead>
         <tbody>
@@ -16,10 +17,38 @@
             <tr>
                 <td> {{ venue.name }} </td>
                 <td> {{ venue.tripexpert_score }} </td>
-                <td> {{ venue.id }}</td>
-                <td> {{ venue.longitude }}</td>
+                <td> {{ venue.address }}</td>
+                <td> {{ venue.phone }}</td>
+                <td><a href="{{ venue.website }}">{{ venue.website }}</a></td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
+
+
+    <h1>Reviews of Attractions</h1>
+
+    {% for venue in itin %}
+        <h2>{{ venue.name }}</h2>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Source</th>
+                <th>Extract</th>
+                <th>Full Review</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            {% for review in venue.reviews %}
+                <tr>
+                    <td> {{ review.publication_name }} </td>
+                    <td> {{ review.extract }} </td>
+                    <td><a href="{{ review.source_url }}">{{ review.source_url }}</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %}
+
 {% endblock %}

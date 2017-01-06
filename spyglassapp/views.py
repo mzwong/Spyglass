@@ -15,7 +15,7 @@ def tripexpert_venue_info(venue_id):
 	req = urllib.request.Request("https://api.tripexpert.com/v1/venues/" + venue_id + "?api_key=" + settings.TRIPEXPERT_API_KEY, headers={'User-Agent': 'Mozilla/5.0'})
 	resp_json = urllib.request.urlopen(req).read().decode('utf-8')
 	resp = json.loads(resp_json)
-	return resp
+	return resp['response']['venue'][0]
 
 
 def index(request):
@@ -51,8 +51,12 @@ def city_options(request, city):
 		info['end_long'] = end[1]
 		itinerary = create_route(info)
 		for i in itinerary:
-			
-		context = {'itin' : itinerary}
+			venue_info = tripexpert_venue_info(i['id'])
+			i['address'] = venue_info['address']
+			i['phone'] = venue_info['telephone']
+			i['website'] = venue_info['website']
+			i['reviews'] = venue_info['reviews']
+		context = {'itin': itinerary}
 		return render(request, 'spyglassapp/route.html', context)
 
 #info will be recieved from the city options form
