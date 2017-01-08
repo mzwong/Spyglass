@@ -2,3 +2,4 @@ Django
 psycopg2
 geopy
 django-geoposition==0.3.0
+googlemaps
