@@ -7,9 +7,18 @@ import math
 from random import random
 from bisect import bisect_left
 from geopy.distance import vincenty
-#helper for making tripexpert API calls
-def tripexpert_api_helper(endpoint):
-    req = urllib.request.Request("https://api.tripexpert.com/v1/" + endpoint + "&api_key=" + settings.TRIPEXPERT_API_KEY, headers={'User-Agent': 'Mozilla/5.0'})
+#helper for making tripexpert API calls.
+def tripexpert_api_venues(curr_lat, curr_long, venue_type, city):
+    venue_type_dict = {'restaurant': '2', 'attraction':'3'}
+    city_dict = {'new_york': '6'}
+
+    base = "https://api.tripexpert.com/v1/venues?&order_by=distance"
+    api = "&api_key=" + settings.TRIPEXPERT_API_KEY
+    lat_long = '&latitude='+str(curr_lat)+'&longitude='+str(curr_long)
+    venue_type = '&venue_type_id=' + venue_type_dict[venue_type]
+    city = '&destination_id=' + city_dict[city]
+    url = base + lat_long + venue_type + city + api
+    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
     resp_json = urllib.request.urlopen(req).read().decode('utf-8')
     resp = json.loads(resp_json)
     return resp
@@ -35,7 +44,12 @@ def create_route():
     ###########################
     itinerary = []
     for i in range(num_events):
-        venues = tripexpert_api_helper('venues?venue_type_id=3&destination_id=6&order_by=distance&latitude='+str(curr_lat)+'&longitude='+str(curr_long))
+        #pick restaurant for lunch halfway through
+        if i == num_events//2:
+            venue_type = 'restaurant'
+        else:
+            venue_type = 'attraction'
+        venues = tripexpert_api_venues(curr_lat, curr_long, venue_type, 'new_york')
         valid_venues = []
         factors = {
             'min_distance' : 999999,
