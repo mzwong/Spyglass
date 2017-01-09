@@ -74,17 +74,8 @@ def create_route():
             venue_lat = float(venue['longitude'])
             venue_score = venue['tripexpert_score']**2
 
-
-            #calculate ellipse search area info:
-            major_axis = remaining_distance
-            '''
-            foci_distance = point_distance(curr_long, end_long, curr_lat, end_lat)
-            minor_axis = math.sqrt(major_axis**2 - foci_distance**2)
-            center_long = math.abs((end_lat - curr_lat)/2)
-            center_lat = math.abs((end_long-curr_long)/2)
-            '''
             #end search if events are beyond search radius
-            if distance > major_axis/2:
+            if distance > remaining_distance/2:
                 break
             #skip if event is out of ellipse
             if distance + vincenty((curr_lat, curr_long), (end_lat, end_long)).miles > remaining_distance:
