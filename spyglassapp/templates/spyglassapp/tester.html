@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+       #map {
+        height: 600px;
+        width: 100%;
+       }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      function initMap() {
+          var start_lat = {{ start.lat }};
+          var start_long = {{ start.long }};
+          var start = {lat: start_lat, lng: start_long};
+          var map = new google.maps.Map(document.getElementById('map'), {
+              zoom: 14,
+              center: start
+          });
+
+          var marker0 = new google.maps.Marker({
+                  position: start,
+                  map: map
+              });
+
+            //TODO: make markers for the itinerary locations passed in through the 'locations' context variable
+
+      }
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBD4Y4-37CkPsNRzX8V5nbOn74wDB37vdE&callback=initMap">
+    </script>
+
+
+  </body>
+</html>

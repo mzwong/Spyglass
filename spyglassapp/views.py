@@ -7,7 +7,7 @@ from django.conf import settings
 from .route_generate import create_route
 import json
 from .forms import *
-import googlemaps
+#import googlemaps
 
 # Create your views here.
 
@@ -62,12 +62,27 @@ def city_options(request, city):
 
 #info will be recieved from the city options form
 def route(request, city):
-	return HttpResponse(create_route())
+	req = urllib.request.Request("https://maps.googleapis.com/maps/api/directions/json?origin=Disneyland&destination=Universal+Studios+Hollywood4&key=AIzaSyBD4Y4-37CkPsNRzX8V5nbOn74wDB37vdE")
+	resp_json = urllib.request.urlopen(req).read().decode('utf-8')
+	resp = json.loads(resp_json)
+	return HttpResponse(resp['routes'][0]['legs'])
 
 
-def directions(request):
-	gmaps = googlemaps.Client(key='AIzaSyBD4Y4-37CkPsNRzX8V5nbOn74wDB37vdE')
-	direction = gmaps.directions("Disneyland", "Universal Studios Hollywood", mode="transit")
-	response = json.dumps(direction)
-	geocode_result = gmaps.geocode('1600 Amphitheatre Parkway, Mountain View, CA')
-	return HttpResponse(response['status'])
+#def directions(request):
+#	gmaps = googlemaps.Client(key='AIzaSyBD4Y4-37CkPsNRzX8V5nbOn74wDB37vdE')
+#	direction = gmaps.directions("Disneyland", "Universal Studios Hollywood", mode="transit")
+#	response = json.dumps(direction)
+#	geocode_result = gmaps.geocode('1600 Amphitheatre Parkway, Mountain View, CA')
+#	return HttpResponse(response['status'])
+
+def tester(request):
+	starting_point = {'lat':40.750568, 'long':-73.99351899999999}
+	itinerary = create_route()
+	locations = []
+	for i in itinerary:
+		point = [float(i['latitude']), float(i['longitude'])]
+		locations.append(point)
+	context = {'start':starting_point,
+			   'locations': locations,
+			   }
+	return render(request, 'spyglassapp/tester.html', context)
