@@ -96,10 +96,13 @@ def create_route():
             cum_score += venue_score
             venue_score_picker.append(cum_score)
             venue_id_picker.append(index)
-        #generate random number and binary search to find event.
-        random_num = random() * cum_score
-        index = bisect_left(venue_score_picker, random_num)
-        selected_venue = valid_venues[index]
+        #generate random number and binary search to find random event until a non-dupicate one is found.
+        while True:
+            random_num = random() * cum_score
+            index = bisect_left(venue_score_picker, random_num)
+            selected_venue = valid_venues[index]
+            if not any([selected_venue['id'] == x['id'] for x in itinerary]):
+                break
         #update itinerary and stats
         itinerary.append(selected_venue)
         curr_lat = selected_venue['latitude']
