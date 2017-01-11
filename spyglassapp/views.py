@@ -83,6 +83,6 @@ def tester(request):
 		point = [float(i['latitude']), float(i['longitude'])]
 		locations.append(point)
 	context = {'start':starting_point,
-			   'locations': locations,
-			   }
+			   'locations':locations,
+	}
 	return render(request, 'spyglassapp/tester.html', context)
