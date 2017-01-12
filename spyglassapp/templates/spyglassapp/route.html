@@ -1,14 +1,14 @@
 {% extends "spyglassapp/base.html" %}
 {% block content %}
-    <style>
-       #map {
-        height: 600px;
-        width: 100%;
-       }
-    </style>
-    <h1>Here is your itinerary!</h1>
-    <table class="table">
-        <thead>
+<style>
+#map {
+    height: 600px;
+    width: 100%;
+}
+</style>
+<h1>Here is your itinerary!</h1>
+<table class="table">
+    <thead>
         <tr>
             <th>Attraction</th>
             <th>Tripexpert Score</th>
@@ -16,70 +16,89 @@
             <th>Phone Number</th>
             <th>Website</th>
         </tr>
-        </thead>
-        <tbody>
+    </thead>
+    <tbody>
 
         {% for venue in itin %}
-            <tr>
-                <td> {{ venue.name }} </td>
-                <td> {{ venue.tripexpert_score }} </td>
-                <td> {{ venue.address }}</td>
-                <td> {{ venue.phone }}</td>
-                <td><a href="{{ venue.website }}">{{ venue.website }}</a></td>
-            </tr>
+        <tr>
+            <td> {{ venue.name }} </td>
+            <td> {{ venue.tripexpert_score }} </td>
+            <td> {{ venue.address }}</td>
+            <td> {{ venue.phone }}</td>
+            <td><a href="{{ venue.website }}">{{ venue.website }}</a></td>
+        </tr>
         {% endfor %}
-        </tbody>
-    </table>
+    </tbody>
+</table>
 
-    <div id="map"></div>
-    <script>
-      function initMap() {
-          var start_lat = {{ start.lat }};
-          var start_long = {{ start.long }};
-          var start = {lat: start_lat, lng: start_long};
-          var map = new google.maps.Map(document.getElementById('map'), {
-              zoom: 14,
-              center: start
-          });
+<div id="map"></div>
+<script>
+function initMap() {
+    var start_lat = {{ start.0 }};
+    var start_long = {{ start.1 }};
+    var start = {lat: start_lat, lng: start_long};
+    var end_lat = {{ end.0 }};
+    var end_long = {{ end.1 }};
+    var end = {lat: end_lat, lng: end_long};
+    var map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 14,
+        center: start
+    });
+    var marker_start = new google.maps.Marker({
+        position: start,
+        map: map,
+        label: 'A'
+    });
+    var locations = {{ itin|safe }};
+    var label = 'B'.charCodeAt(0);
+    for (var i = 0; i < locations.length; i++) {
+        var currLocation = locations[i];
+        var marker = new google.maps.Marker({
+            position: {lat: currLocation['latitude'], lng: currLocation['longitude']},
+            label: String.fromCharCode(label),
+            map: map
+        });
+        label++;
+    }
+    var marker_end = new google.maps.Marker({
+        position: end,
+        map: map,
+        label: String.fromCharCode(label)
+    });
+}
 
-          var marker0 = new google.maps.Marker({
-                  position: start,
-                  map: map
-              });
 
-            //TODO: make markers for the itinerary locations passed in through the 'locations' context variable
-
-      }
-    </script>
-    <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBD4Y4-37CkPsNRzX8V5nbOn74wDB37vdE&callback=initMap">
-    </script>
+</script>
+<script async defer
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBD4Y4-37CkPsNRzX8V5nbOn74wDB37vdE&callback=initMap">
+alert({{itin|safe}});
+</script>
 
 
 
-    <h1>Reviews of Attractions</h1>
+<h1>Reviews of Attractions</h1>
 
-    {% for venue in itin %}
-        <h2>{{ venue.name }}</h2>
-        <table class="table">
-            <thead>
-            <tr>
-                <th>Source</th>
-                <th>Extract</th>
-                <th>Full Review</th>
-            </tr>
-            </thead>
-            <tbody>
+{% for venue in itin %}
+<h2>{{ venue.name }}</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Source</th>
+            <th>Extract</th>
+            <th>Full Review</th>
+        </tr>
+    </thead>
+    <tbody>
 
-            {% for review in venue.reviews %}
-                <tr>
-                    <td> {{ review.publication_name }} </td>
-                    <td> {{ review.extract }} </td>
-                    <td><a href="{{ review.source_url }}">{{ review.source_url }}</a></td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    {% endfor %}
+        {% for review in venue.reviews %}
+        <tr>
+            <td> {{ review.publication_name }} </td>
+            <td> {{ review.extract }} </td>
+            <td><a href="{{ review.source_url }}">{{ review.source_url }}</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endfor %}
 
 {% endblock %}

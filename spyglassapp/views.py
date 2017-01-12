@@ -58,6 +58,7 @@ def city_options(request, city):
 			i['phone'] = venue_info['telephone']
 			i['website'] = venue_info['website']
 			i['reviews'] = venue_info['reviews']
+<<<<<<< Updated upstream
 		request.session['itinerary'] = itinerary
 		return redirect('route', city=city)
 
@@ -71,6 +72,17 @@ def route(request, city):
 	itinerary = request.session['itinerary']
 	context = {'itin': itinerary}
 	return render(request, 'spyglassapp/route.html', context)
+=======
+		context = {'itin': itinerary, 'start': start, 'end': end}
+		return render(request, 'spyglassapp/route.html', context)
+
+#info will be recieved from the city options form
+def route(request, city):
+	req = urllib.request.Request("https://maps.googleapis.com/maps/api/directions/json?origin=Disneyland&destination=Universal+Studios+Hollywood4&key=AIzaSyBD4Y4-37CkPsNRzX8V5nbOn74wDB37vdE")
+	resp_json = urllib.request.urlopen(req).read().decode('utf-8')
+	resp = json.loads(resp_json)
+	return JsonResponse(resp)
+>>>>>>> Stashed changes
 
 
 #def directions(request):
