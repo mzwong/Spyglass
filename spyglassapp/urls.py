@@ -9,5 +9,4 @@ urlpatterns = [
 	url(r'^venue_list/$', views.new_york_city_venues, name='new_york_city_venues'),
     url(r'^(?P<city>(new_york|boston))/options/$', views.city_options, name='city_options'),
     url(r'^(?P<city>(new_york|boston))/route/$', views.route, name='route'),
-	url(r'^tester/$', views.tester, name='tester'),
 ]
