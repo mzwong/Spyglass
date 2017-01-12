@@ -1,12 +1,13 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 import urllib.request
 import urllib.parse
 import urllib
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.conf import settings
 from .route_generate import create_route
 import json
 from .forms import *
+from django.core.urlresolvers import reverse
 #import googlemaps
 
 # Create your views here.
@@ -57,15 +58,19 @@ def city_options(request, city):
 			i['phone'] = venue_info['telephone']
 			i['website'] = venue_info['website']
 			i['reviews'] = venue_info['reviews']
-		context = {'itin': itinerary}
-		return render(request, 'spyglassapp/route.html', context)
+		request.session['itinerary'] = itinerary
+		return redirect('route', city=city)
+
 
 #info will be recieved from the city options form
 def route(request, city):
-	req = urllib.request.Request("https://maps.googleapis.com/maps/api/directions/json?origin=Disneyland&destination=Universal+Studios+Hollywood4&key=AIzaSyBD4Y4-37CkPsNRzX8V5nbOn74wDB37vdE")
-	resp_json = urllib.request.urlopen(req).read().decode('utf-8')
-	resp = json.loads(resp_json)
-	return HttpResponse(resp['routes'][0]['legs'])
+	#req = urllib.request.Request("https://maps.googleapis.com/maps/api/directions/json?origin=Disneyland&destination=Universal+Studios+Hollywood4&key=AIzaSyBD4Y4-37CkPsNRzX8V5nbOn74wDB37vdE")
+	#resp_json = urllib.request.urlopen(req).read().decode('utf-8')
+	#resp = json.loads(resp_json)
+	#return HttpResponse(resp['routes'][0]['legs'])
+	itinerary = request.session['itinerary']
+	context = {'itin': itinerary}
+	return render(request, 'spyglassapp/route.html', context)
 
 
 #def directions(request):
