@@ -1,11 +1,11 @@
 {% extends "spyglassapp/base.html" %}
+{% load staticfiles %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/route.css' %}">
+{% endblock %}
+
 {% block content %}
-<style>
-#map {
-    height: 600px;
-    width: 100%;
-}
-</style>
 <h1>Here is your itinerary!</h1>
 <table class="table">
     <thead>
@@ -32,34 +32,6 @@
 </table>
 
 <div id="map"></div>
-<script>
-function initMap() {
-    var locations = {{ coordinates }};
-    var start = {lat: locations[0][0], lng: locations[0][1]};
-    var map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 14,
-        center: start
-    });
-
-    var label = 'A'.charCodeAt(0);
-    for (var i = 0; i < locations.length; i++) {
-        var currLocation = locations[i];
-        var marker = new google.maps.Marker({
-            position: {lat: currLocation[0], lng: currLocation[1]},
-            label: String.fromCharCode(label),
-            map: map
-        });
-        label++;
-    }
-}
-
-
-</script>
-<script async defer
-src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBD4Y4-37CkPsNRzX8V5nbOn74wDB37vdE&callback=initMap">
-</script>
-
-
 
 <h1>Reviews of Attractions</h1>
 
@@ -86,4 +58,12 @@ src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBD4Y4-37CkPsNRzX8V5nbOn74
 </table>
 {% endfor %}
 
+<script>
+var locations = {{ coordinates }};
+</script>
+<script src="{% static 'js/route.js' %}">
+</script>
+<script async defer
+src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&callback=initMap">
+</script>
 {% endblock %}
