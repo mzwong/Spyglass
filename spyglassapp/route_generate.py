@@ -24,12 +24,12 @@ def calculate_score(factor, distance, tripexpert_score):
     scaled_tripexpert_score = (tripexpert_score - factor['min_score']) / (factor['max_score'] - factor['min_score'])
     return scaled_distance + scaled_tripexpert_score*100
 
-def create_route():
+def create_route(info={'start_lat':40.7484, 'start_long':-73.98570000000001, 'end_lat':40.7484, 'end_long':-73.98570000000001}):
     #####starting options######
-    end_lat = 40.7484
-    end_long = -73.9857
-    curr_lat = end_lat
-    curr_long = end_long
+    curr_lat = info['start_lat']
+    curr_long = info['start_long']
+    end_lat = info['end_lat']
+    end_long = info['end_long']
     remaining_distance = 10
     num_events = 5
     ###########################
