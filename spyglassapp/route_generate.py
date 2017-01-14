@@ -7,9 +7,18 @@ import math
 from random import random
 from bisect import bisect_left
 from geopy.distance import vincenty
-#helper for making tripexpert API calls
-def tripexpert_api_helper(endpoint):
-    req = urllib.request.Request("https://api.tripexpert.com/v1/" + endpoint + "&api_key=" + settings.TRIPEXPERT_API_KEY, headers={'User-Agent': 'Mozilla/5.0'})
+#helper for making tripexpert API calls.
+def tripexpert_api_venues(curr_lat, curr_long, venue_type, city):
+    venue_type_dict = {'restaurant': '2', 'attraction':'3'}
+    city_dict = {'new_york': '6'}
+
+    base = "https://api.tripexpert.com/v1/venues?&order_by=distance"
+    api = "&api_key=" + settings.TRIPEXPERT_API_KEY
+    lat_long = '&latitude='+str(curr_lat)+'&longitude='+str(curr_long)
+    venue_type = '&venue_type_id=' + venue_type_dict[venue_type]
+    city = '&destination_id=' + city_dict[city]
+    url = base + lat_long + venue_type + city + api
+    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
     resp_json = urllib.request.urlopen(req).read().decode('utf-8')
     resp = json.loads(resp_json)
     return resp
@@ -35,7 +44,12 @@ def create_route(info={'start_lat':40.7484, 'start_long':-73.98570000000001, 'en
     ###########################
     itinerary = []
     for i in range(num_events):
-        venues = tripexpert_api_helper('venues?venue_type_id=3&destination_id=6&order_by=distance&latitude='+str(curr_lat)+'&longitude='+str(curr_long))
+        #pick restaurant for lunch halfway through
+        if i == num_events//2:
+            venue_type = 'restaurant'
+        else:
+            venue_type = 'attraction'
+        venues = tripexpert_api_venues(curr_lat, curr_long, venue_type, 'new_york')
         valid_venues = []
         factors = {
             'min_distance' : 999999,
@@ -60,17 +74,8 @@ def create_route(info={'start_lat':40.7484, 'start_long':-73.98570000000001, 'en
             venue_lat = float(venue['longitude'])
             venue_score = venue['tripexpert_score']**2
 
-
-            #calculate ellipse search area info:
-            major_axis = remaining_distance
-            '''
-            foci_distance = point_distance(curr_long, end_long, curr_lat, end_lat)
-            minor_axis = math.sqrt(major_axis**2 - foci_distance**2)
-            center_long = math.abs((end_lat - curr_lat)/2)
-            center_lat = math.abs((end_long-curr_long)/2)
-            '''
             #end search if events are beyond search radius
-            if distance > major_axis/2:
+            if distance > remaining_distance/2:
                 break
             #skip if event is out of ellipse
             if distance + vincenty((curr_lat, curr_long), (end_lat, end_long)).miles > remaining_distance:
@@ -96,10 +101,13 @@ def create_route(info={'start_lat':40.7484, 'start_long':-73.98570000000001, 'en
             cum_score += venue_score
             venue_score_picker.append(cum_score)
             venue_id_picker.append(index)
-        #generate random number and binary search to find event.
-        random_num = random() * cum_score
-        index = bisect_left(venue_score_picker, random_num)
-        selected_venue = valid_venues[index]
+        #generate random number and binary search to find random event until a non-dupicate one is found.
+        while True:
+            random_num = random() * cum_score
+            index = bisect_left(venue_score_picker, random_num)
+            selected_venue = valid_venues[index]
+            if not any([selected_venue['id'] == x['id'] for x in itinerary]):
+                break
         #update itinerary and stats
         itinerary.append(selected_venue)
         curr_lat = selected_venue['latitude']
