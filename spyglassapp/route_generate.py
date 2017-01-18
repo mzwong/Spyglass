@@ -29,9 +29,9 @@ def point_distance(x1,y1,x2,y2):
 #magic do not touch!!!! The success of this formula will determine the success of Spyglass
 def calculate_score(factor, distance, tripexpert_score):
     #reverse the scaled distance scores so that small distances have a higher scaled score.
-    scaled_distance = (factor['max_distance'] - (distance - factor['min_distance'])) / (factor['max_distance']-factor['min_distance'])
+    scaled_distance = (distance - factor['min_distance']) / (factor['max_distance']-factor['min_distance'])
     scaled_tripexpert_score = (tripexpert_score - factor['min_score']) / (factor['max_score'] - factor['min_score'])
-    return scaled_distance + scaled_tripexpert_score*100
+    return scaled_distance + 70*scaled_tripexpert_score
 
 def create_route(info={'start_lat':40.7484, 'start_long':-73.98570000000001, 'end_lat':40.7484, 'end_long':-73.98570000000001}):
     #####starting options######
@@ -69,19 +69,28 @@ def create_route(info={'start_lat':40.7484, 'start_long':-73.98570000000001, 'en
             if invalid_venue:
                 break
 
-            distance = float(venue['distance'])
-            venue_long = float(venue['latitude'])
-            venue_lat = float(venue['longitude'])
-            venue_score = venue['tripexpert_score']**2
 
+            distance = float(venue['distance'])
             #end search if events are beyond search radius
             if distance > remaining_distance/2:
                 break
             #skip if event is out of ellipse
             if distance + vincenty((curr_lat, curr_long), (end_lat, end_long)).miles > remaining_distance:
                 continue
+            #skip if event is already in itinerary
+            if any([venue['id'] == x['id'] for x in itinerary]):
+                continue
             #add venue to list of valid venues
             valid_venues.append(venue)
+
+############ modify factors here: ####################################
+            distance = 1/((distance+.1)**2)
+            venue_score = math.exp(venue['tripexpert_score'])
+
+            venue['~distance'] = distance
+            venue['~tripexpert_score'] = venue_score
+######################################################################
+
             #update max and mins
             if distance > factors['max_distance']:
                 factors['max_distance'] = distance
@@ -94,20 +103,15 @@ def create_route(info={'start_lat':40.7484, 'start_long':-73.98570000000001, 'en
 
         #calculate each score and setup array of events and scores for 'random' picking
         venue_score_picker = []
-        venue_id_picker = []
         cum_score = 0
         for index, venue in enumerate(valid_venues):
-            venue_score = calculate_score(factors, venue['distance'], venue['tripexpert_score'])
+            venue_score = calculate_score(factors, venue['~distance'], venue['~tripexpert_score'])
             cum_score += venue_score
             venue_score_picker.append(cum_score)
-            venue_id_picker.append(index)
         #generate random number and binary search to find random event until a non-dupicate one is found.
-        while True:
-            random_num = random() * cum_score
-            index = bisect_left(venue_score_picker, random_num)
-            selected_venue = valid_venues[index]
-            if not any([selected_venue['id'] == x['id'] for x in itinerary]):
-                break
+        random_num = random() * cum_score
+        index = bisect_left(venue_score_picker, random_num)
+        selected_venue = valid_venues[index]
         #update itinerary and stats
         itinerary.append(selected_venue)
         curr_lat = selected_venue['latitude']
