@@ -64,7 +64,7 @@ def create_route(info={'start_lat':40.7484, 'start_long':-73.98570000000001, 'en
             api_attributes = ['distance', 'latitude', 'longitude', 'tripexpert_score']
             invalid_venue = False
             for attribute in api_attributes:
-                if venue[attribute] is None:
+                if venue is None or venue[attribute] is None:
                     invalid_venue=True
             if invalid_venue:
                 break
