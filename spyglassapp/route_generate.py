@@ -24,9 +24,6 @@ def tripexpert_api_venues(curr_lat, curr_long, venue_type, city):
     resp = json.loads(resp_json)
     return resp
 
-def point_distance(x1,y1,x2,y2):
-    return math.sqrt((x1 - x2)**2 + (y1-y2)**2)
-
 #magic do not touch!!!! The success of this formula will determine the success of Spyglass
 def calculate_score(factor, distance, tripexpert_score, end_distance):
     scaled_distance = (distance - factor['min_distance']) / (factor['max_distance']-factor['min_distance'])
@@ -92,7 +89,7 @@ def create_route(info={'start_lat':40.7484, 'start_long':-73.98570000000001, 'en
 
 ############ modify factors here: ####################################
             distance = 1/((distance+.1)**2)
-            venue_score = math.exp(venue['tripexpert_score'])
+            venue_score = 1/(1+math.exp(-(venue['tripexpert_score']-90)*3))
             end_distance = 1/((end_distance+.1)**2)
 
             venue['~distance'] = distance
