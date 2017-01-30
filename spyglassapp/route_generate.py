@@ -8,7 +8,7 @@ from random import random
 from bisect import bisect_left
 from geopy.distance import vincenty
 #helper for making tripexpert API calls.
-def tripexpert_api_venues(curr_lat, curr_long, venue_type, city):
+def tripexpert_api_venues(curr_lat, curr_long, venue_type, cost, city):
     venue_type_dict = {'restaurant': '2', 'attraction':'3'}
     city_dict = {'new_york': '6'}
 
@@ -17,7 +17,8 @@ def tripexpert_api_venues(curr_lat, curr_long, venue_type, city):
     lat_long = '&latitude='+str(curr_lat)+'&longitude='+str(curr_long)
     venue_type = '&venue_type_id=' + venue_type_dict[venue_type]
     city = '&destination_id=' + city_dict[city]
-    url = base + lat_long + venue_type + city + api
+    cost = '&price_category_ids=' + str(cost) if  venue_type == 2 and cost != 0  else ""
+    url = base + lat_long + venue_type + city + cost + api
     req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
     resp_json = urllib.request.urlopen(req).read().decode('utf-8')
     resp = json.loads(resp_json)
@@ -33,12 +34,13 @@ def calculate_score(factor, distance, tripexpert_score):
     scaled_tripexpert_score = (tripexpert_score - factor['min_score']) / (factor['max_score'] - factor['min_score'])
     return scaled_distance + scaled_tripexpert_score*100
 
-def create_route(info={'start_lat':40.7484, 'start_long':-73.98570000000001, 'end_lat':40.7484, 'end_long':-73.98570000000001}):
+def create_route(info={'start_lat':40.7484, 'start_long':-73.98570000000001, 'end_lat':40.7484, 'end_long':-73.98570000000001,'cost':0}):
     #####starting options######
     curr_lat = info['start_lat']
     curr_long = info['start_long']
     end_lat = info['end_lat']
     end_long = info['end_long']
+    cost = info['cost']
     remaining_distance = 10
     num_events = 5
     ###########################
@@ -49,7 +51,7 @@ def create_route(info={'start_lat':40.7484, 'start_long':-73.98570000000001, 'en
             venue_type = 'restaurant'
         else:
             venue_type = 'attraction'
-        venues = tripexpert_api_venues(curr_lat, curr_long, venue_type, 'new_york')
+        venues = tripexpert_api_venues(curr_lat, curr_long, venue_type, cost, 'new_york')
         valid_venues = []
         factors = {
             'min_distance' : 999999,
