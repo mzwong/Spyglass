@@ -7,6 +7,7 @@ import math
 from random import random
 from bisect import bisect_left
 from geopy.distance import vincenty
+
 #helper for making tripexpert API calls.
 def tripexpert_api_venues(curr_lat, curr_long, venue_type, cost, city):
     venue_type_dict = {'restaurant': '2', 'attraction':'3'}
@@ -24,15 +25,13 @@ def tripexpert_api_venues(curr_lat, curr_long, venue_type, cost, city):
     resp = json.loads(resp_json)
     return resp
 
-def point_distance(x1,y1,x2,y2):
-    return math.sqrt((x1 - x2)**2 + (y1-y2)**2)
-
 #magic do not touch!!!! The success of this formula will determine the success of Spyglass
-def calculate_score(factor, distance, tripexpert_score):
-    #reverse the scaled distance scores so that small distances have a higher scaled score.
-    scaled_distance = (factor['max_distance'] - (distance - factor['min_distance'])) / (factor['max_distance']-factor['min_distance'])
+def calculate_score(factor, distance, tripexpert_score, end_distance):
+    scaled_distance = (distance - factor['min_distance']) / (factor['max_distance']-factor['min_distance'])
     scaled_tripexpert_score = (tripexpert_score - factor['min_score']) / (factor['max_score'] - factor['min_score'])
-    return scaled_distance + scaled_tripexpert_score*100
+    move_towards_end = factor['iteration']/factor['num_events']
+    scaled_end_distance = (end_distance - factor['min_end_distance']) / (factor['max_end_distance'] - factor['min_end_distance'])
+    return scaled_distance + 70*scaled_tripexpert_score + (move_towards_end * scaled_end_distance)
 
 def create_route(info={'start_lat':40.7484, 'start_long':-73.98570000000001, 'end_lat':40.7484, 'end_long':-73.98570000000001,'cost':0}):
     #####starting options######
@@ -58,6 +57,10 @@ def create_route(info={'start_lat':40.7484, 'start_long':-73.98570000000001, 'en
             'max_distance' : 0,
             'min_score' : 100,
             'max_score' : 0,
+            'min_end_distance' : 999999,
+            'max_end_distance' : 0,
+            'num_events' : num_events,
+            'iteration' : i,
         }
 
         #process all venues from api call
@@ -71,19 +74,31 @@ def create_route(info={'start_lat':40.7484, 'start_long':-73.98570000000001, 'en
             if invalid_venue:
                 break
 
-            distance = float(venue['distance'])
-            venue_long = float(venue['latitude'])
-            venue_lat = float(venue['longitude'])
-            venue_score = venue['tripexpert_score']**2
 
+            distance = float(venue['distance'])
+            end_distance = vincenty((venue['latitude'], venue['longitude']), (end_lat, end_long)).miles
             #end search if events are beyond search radius
             if distance > remaining_distance/2:
                 break
             #skip if event is out of ellipse
-            if distance + vincenty((curr_lat, curr_long), (end_lat, end_long)).miles > remaining_distance:
+            if distance + end_distance > remaining_distance:
+                continue
+            #skip if event is already in itinerary
+            if any([venue['id'] == x['id'] for x in itinerary]):
                 continue
             #add venue to list of valid venues
             valid_venues.append(venue)
+
+############ modify factors here: ####################################
+            distance = 1/((distance+.1)**2)
+            venue_score = 1/(1+math.exp(-(venue['tripexpert_score']-90)*3))
+            end_distance = 1/((end_distance+.1)**2)
+
+            venue['~distance'] = distance
+            venue['~tripexpert_score'] = venue_score
+            venue['~end_distance'] = end_distance
+######################################################################
+
             #update max and mins
             if distance > factors['max_distance']:
                 factors['max_distance'] = distance
@@ -93,23 +108,22 @@ def create_route(info={'start_lat':40.7484, 'start_long':-73.98570000000001, 'en
                 factors['max_score'] = venue_score
             if venue_score < factors['min_score']:
                 factors['min_score'] = venue_score
+            if end_distance > factors['max_end_distance']:
+                factors['max_end_distance'] = end_distance
+            if end_distance < factors['min_end_distance']:
+                factors['min_end_distance'] = end_distance
 
         #calculate each score and setup array of events and scores for 'random' picking
         venue_score_picker = []
-        venue_id_picker = []
         cum_score = 0
         for index, venue in enumerate(valid_venues):
-            venue_score = calculate_score(factors, venue['distance'], venue['tripexpert_score'])
+            venue_score = calculate_score(factors, venue['~distance'], venue['~tripexpert_score'], venue['~end_distance'])
             cum_score += venue_score
             venue_score_picker.append(cum_score)
-            venue_id_picker.append(index)
         #generate random number and binary search to find random event until a non-dupicate one is found.
-        while True:
-            random_num = random() * cum_score
-            index = bisect_left(venue_score_picker, random_num)
-            selected_venue = valid_venues[index]
-            if not any([selected_venue['id'] == x['id'] for x in itinerary]):
-                break
+        random_num = random() * cum_score
+        index = bisect_left(venue_score_picker, random_num)
+        selected_venue = valid_venues[index]
         #update itinerary and stats
         itinerary.append(selected_venue)
         curr_lat = selected_venue['latitude']

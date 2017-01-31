@@ -50,7 +50,7 @@
         {% for review in venue.reviews %}
         <tr>
             <td> {{ review.publication_name }} </td>
-            <td> {{ review.extract }} </td>
+            <td> {{ review.extract|safe }} </td>
             <td><a href="{{ review.source_url }}">{{ review.source_url }}</a></td>
         </tr>
         {% endfor %}
