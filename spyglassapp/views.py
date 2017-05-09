@@ -14,10 +14,10 @@ from django.core.urlresolvers import reverse
 
 #helper for making tripexpert API calls
 def tripexpert_venue_info(venue_id):
-    req = urllib.request.Request("https://api.tripexpert.com/v1/venues/" + venue_id + "?api_key=" + settings.TRIPEXPERT_API_KEY, headers={'User-Agent': 'Mozilla/5.0'})
+    req = urllib.request.Request("https://api.tripexpert.com/v1/venues/" + str(venue_id) + "?api_key=" + settings.TRIPEXPERT_API_KEY, headers={'User-Agent': 'Mozilla/5.0'})
     resp_json = urllib.request.urlopen(req).read().decode('utf-8')
     resp = json.loads(resp_json)
-    return resp['response']['venue'][0]
+    return resp['response']['venues'][0]
 
 
 def index(request):
