@@ -22,6 +22,3 @@ class Event(models.Model):
     service_name = models.CharField(max_length=200)
     time = models.DateTimeField()
     location = models.CharField(max_length=200)
-
-
-

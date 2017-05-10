@@ -13,6 +13,7 @@
             <input type="title" class="form-control" name="{{ form.name.name }}" id="{{ form.name.id_for_label }}">
         </div>
 
+        <h3>Pick a price point:</h3>
         <label class="radio-inline">
             <input type="radio" name="{{ form.cost.name }}" id="{{ form.cost.id_for_label }}" value="0"> Any
         </label>
@@ -25,6 +26,19 @@
         <label class="radio-inline">
             <input type="radio" name="{{ form.cost.name }}" id="{{ form.cost.id_for_label }}" value="6"> $$$
         </label>
+
+        <h3>What kind of attractions are you interested in?</h3>
+        {{ form.attraction_types }}
+
+        <label class="checkbox-inline">
+            <input type="checkbox" name="attraction_types" id="id_attraction_types_0" value="33"> Museums
+        </label>
+        <label class="checkbox-inline">
+            <input type="checkbox" name="attraction_types" id="id_attraction_types_1" value="34"> Outdoors
+        </label>
+        <label class="checkbox-inline">
+            <input type="checkbox" name="attraction_types" id="id_attraction_types_2" value="35"> Historical
+        </label>-->
 
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
         <h3>Starting Location:</h3>
