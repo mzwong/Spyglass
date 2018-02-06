@@ -9,17 +9,21 @@ from bisect import bisect_left
 from geopy.distance import vincenty
 
 #helper for making tripexpert API calls.
-def tripexpert_api_venues(curr_lat, curr_long, venue_type, cost, city):
+def tripexpert_api_venues(curr_lat, curr_long, venue_type, cost, categories, city):
     venue_type_dict = {'restaurant': '2', 'attraction':'3'}
     city_dict = {'new_york': '6'}
 
     base = "https://api.tripexpert.com/v1/venues?&order_by=distance"
     api = "&api_key=" + settings.TRIPEXPERT_API_KEY
     lat_long = '&latitude='+str(curr_lat)+'&longitude='+str(curr_long)
-    venue_type = '&venue_type_id=' + venue_type_dict[venue_type]
+    venue = '&venue_type_id=' + venue_type_dict[venue_type]
     city = '&destination_id=' + city_dict[city]
-    cost = '&price_category_ids=' + str(cost) if  venue_type == 2 and cost != 0  else ""
-    url = base + lat_long + venue_type + city + cost + api
+    cost = '&price_category_ids=' + str(cost) if  venue_type == 'restaurant' and cost != 0  else ""
+    cats = ""
+    if venue_type != 'restaurant':
+        for c in categories:
+            cats += '&category_ids[]=' + str(c)
+    url = base + lat_long + venue + city + cost + cats + api
     req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
     resp_json = urllib.request.urlopen(req).read().decode('utf-8')
     resp = json.loads(resp_json)
@@ -40,6 +44,7 @@ def create_route(info={'start_lat':40.7484, 'start_long':-73.98570000000001, 'en
     end_lat = info['end_lat']
     end_long = info['end_long']
     cost = info['cost']
+    categories = info['categories']
     remaining_distance = 10
     num_events = 5
     ###########################
@@ -50,7 +55,7 @@ def create_route(info={'start_lat':40.7484, 'start_long':-73.98570000000001, 'en
             venue_type = 'restaurant'
         else:
             venue_type = 'attraction'
-        venues = tripexpert_api_venues(curr_lat, curr_long, venue_type, cost, 'new_york')
+        venues = tripexpert_api_venues(curr_lat, curr_long, venue_type, cost, categories, 'new_york')
         valid_venues = []
         factors = {
             'min_distance' : 999999,

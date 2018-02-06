@@ -4,7 +4,7 @@ from .models import *
 from django import forms
 
 class OptionsForm(ModelForm):
-	OPTIONS = (("museums", "Museums"),("outdoors", "Outdoors"),("historical", "Historical"))
+	OPTIONS = (("33", "Museums"),("34", "Outdoors"),("35", "Historical"))
 	attraction_types = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, choices=OPTIONS)
 	class Meta:
 		model = Itinerary

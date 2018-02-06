@@ -52,6 +52,7 @@ def city_options(request, city):
         info['end_lat'] = float(end[0])
         info['end_long'] = float(end[1])
         info['cost'] = int(options_form.cleaned_data['cost'])
+        info['categories'] = options_form.cleaned_data['attraction_types']
         request.session['options'] = info
         return redirect('route', city=city)
 
